@@ -4,25 +4,27 @@ module Day01
 
 import qualified Data.ByteString as BS
 import qualified Data.List as DL
+import qualified Control.Applicative as CA
 
 type Input = [Int]
 type Result = Int
 
+-- Solution: 1655
 solver1 :: Input -> Result
-solver1 (h:hs) = DL.foldl' (+) 0 $ rec h hs
+solver1 hs = DL.foldl' (+) 0 $ zipWith zipper hs (tail hs)
 	where
-	rec h [] = []
-	rec h (g:gs)
-		| g > h = 1 : rec g gs
-		| otherwise = 0 : rec g gs
+	zipper h g
+		| g > h = 1
+		| otherwise = 0
 
+-- Solution: 1683
 solver2 :: Input -> Result
-solver2 (a1:a2:a3:bs) = DL.foldl' (+) 0 $ rec (a1+a2+a3) (a2:a3:bs)
+solver2 hs = DL.foldl' (+) 0 $
+	zipper <$> CA.ZipList hs <*> CA.ZipList (tail hs) <*> CA.ZipList (tail (tail hs)) <*> CA.ZipList (tail (tail (tail hs)))
 	where
-	rec h (b1:b2:b3:cs)
-		| (b1+b2+b3) > h = 1 : rec (b1+b2+b3) (b2:b3:cs)
-		| otherwise = 0 : rec (b1+b2+b3) (b2:b3:cs)
-	rec h _ = []
+	zipper h1 h2 h3 h4
+		| (h2+h3+h4) > (h1+h2+h3) = 1
+		| otherwise = 0
 
 simpleParser :: String -> Input
 simpleParser = fmap read . lines
